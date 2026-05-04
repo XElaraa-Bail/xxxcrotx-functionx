@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --accent: #00f2fe;
+            --accent-2: #4facfe;
+            --gold: #e2b04a;
+            --bg: #050505;
+            --glass: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg);
+            background-image: 
+                radial-gradient(circle at 20% 20%, rgba(79, 172, 254, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 80% 80%, rgba(0, 242, 254, 0.05) 0%, transparent 40%);
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated Border Container */
+        .profile-container {
+            position: relative;
+            padding: 3px;
+            border-radius: 24px;
+            background: linear-gradient(45deg, transparent, var(--border), transparent);
+            transition: 0.5s;
+        }
+
+        .profile-container:hover {
+            background: linear-gradient(45deg, var(--accent), var(--gold), var(--accent-2));
+            box-shadow: 0 0 30px rgba(79, 172, 254, 0.3);
+        }
+
+        .profile-card {
+            background: #0d0d0d;
+            backdrop-filter: blur(20px);
+            border-radius: 22px;
+            padding: 50px 40px;
+            max-width: 450px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .img-wrapper {
+            position: relative;
+            width: 130px;
+            height: 130px;
+            margin: 0 auto 25px;
+        }
+
+        .profile-img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--border);
+            padding: 5px;
+            transition: 0.5s;
+        }
+
+        .profile-container:hover .profile-img {
+            border-color: var(--accent);
+            transform: scale(1.05);
+        }
+
+        h1 {
+            font-weight: 800;
+            font-size: 32px;
+            letter-spacing: -1px;
+            margin-bottom: 5px;
+            background: linear-gradient(to right, #fff, #888);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .alias {
+            font-size: 14px;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+
+        .section {
+            text-align: left;
+            margin-top: 30px;
+        }
+
+        .section-title {
+            font-size: 12px;
+            font-weight: 800;
+            color: rgba(255, 255, 255, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title::after {
+            content: "";
+            height: 1px;
+            flex-grow: 1;
+            background: var(--border);
+            margin-left: 15px;
+        }
+
+        .info-list {
+            list-style: none;
+            font-size: 14px;
+            color: #ccc;
+            line-height: 2;
+        }
+
+        .info-list li {
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .info-list li::before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+        }
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .tag {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #eee;
+            transition: 0.3s;
+        }
+
+        .tag:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--accent);
+        }
+
+        .shop-banner {
+            margin-top: 40px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01));
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px dashed var(--border);
+        }
+
+        .shop-banner h3 {
+            font-size: 14px;
+            color: var(--gold);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+
+        .glitch-text {
+            color: #ff4b2b;
+            font-weight: 800;
+            font-size: 12px;
+            text-shadow: 0 0 10px rgba(255, 75, 43, 0.3);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="profile-container">
+        <div class="profile-card">
+            <div class="img-wrapper">
+                <img src="https://files.catbox.moe/mcohgl.jpg" alt="BahrulXyzet" class="profile-img">
+            </div>
+            
+            <h1>Kimiro Thermal</h1>
+            <div class="alias">@kimiro • Senior Developer</div>
+
+            <div class="tags" style="justify-content: center;">
+                <span class="tag">Node.js</span>
+                <span class="tag">System Arch</span>
+                <span class="tag">Automation</span>
+            </div>
+
+            <div class="section">
+                <div class="section-title">Professional Expertise</div>
+                <ul class="info-list">
+                    <li>Specialist Messaging Automation (WA/TG)</li>
+                    <li>System & Hardware Performance Tuning</li>
+                    <li>Pterodactyl Infrastructure Management</li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <div class="section-title">Activities & Hobbies</div>
+                <ul class="info-list">
+                    <li>Architecting Kimiro Thermal Projects</li>
+                    <li>UI/UX Design (HTML & CSS Enthusiast)</li>
+                    <li>Cross-platform Dev (Flutter & Web-to-APK)</li>
+                </ul>
+            </div>
+
+            <div class="shop-banner">
+                <h3>Exclusive Services</h3>
+                <div class="glitch-text">
+                    APK BUG • SC BUG • MURBUG
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
