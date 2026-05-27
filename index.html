@@ -1,237 +1,1225 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title></title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --accent: #00f2fe;
-            --accent-2: #4facfe;
-            --gold: #e2b04a;
-            --bg: #050505;
-            --glass: rgba(255, 255, 255, 0.03);
-            --border: rgba(255, 255, 255, 0.1);
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VAULT // Secure Code Repository</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@300;400;500;600&family=Outfit:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg-void:#050507;--bg-deep:#09090d;--bg-panel:#0d0e13;
+  --bg-surface:#111318;--bg-raised:#171921;--bg-hover:#1d1f29;
+  --lime:#c6f135;--lime-dim:#a0c420;--lime-pale:#e8fb9a;
+  --lime-glow:rgba(198,241,53,0.12);--lime-border:rgba(198,241,53,0.2);
+  --cyan:#00e5ff;--cyan-dim:#00b8cc;--cyan-glow:rgba(0,229,255,0.08);
+  --red:#ff3d3d;--amber:#ffb340;
+  --text-1:#f0f2f8;--text-2:#8890a8;--text-3:#40465a;--text-4:#262b3a;
+  --border-1:rgba(255,255,255,0.06);--border-2:rgba(255,255,255,0.10);--border-3:rgba(255,255,255,0.16);
+  --mono:'IBM Plex Mono',monospace;--body:'Outfit',sans-serif;--display:'Bebas Neue',cursive;
+  --radius-sm:6px;--radius-md:10px;--radius-lg:16px;--radius-xl:22px;
+}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--text-3);border-radius:99px}
+::-webkit-scrollbar-thumb:hover{background:var(--text-2)}
+html{scroll-behavior:smooth}
+body{font-family:var(--body);background:var(--bg-void);color:var(--text-1);min-height:100vh;overflow-x:hidden}
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+/* ══════ VERIFY OVERLAY ══════ */
+#verifyOverlay{
+  position:fixed;inset:0;z-index:9999;
+  background:var(--bg-void);
+  display:flex;align-items:center;justify-content:center;padding:20px;
+}
 
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: var(--bg);
-            background-image: 
-                radial-gradient(circle at 20% 20%, rgba(79, 172, 254, 0.1) 0%, transparent 40%),
-                radial-gradient(circle at 80% 80%, rgba(0, 242, 254, 0.05) 0%, transparent 40%);
-            color: #ffffff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
+.v-bg-grid{
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:linear-gradient(var(--border-1) 1px,transparent 1px),linear-gradient(90deg,var(--border-1) 1px,transparent 1px);
+  background-size:40px 40px;
+  mask-image:radial-gradient(ellipse 80% 60% at 50% 0%,black 40%,transparent 100%);
+}
+.v-orb{position:fixed;border-radius:50%;filter:blur(80px);pointer-events:none;z-index:0;animation:orbDrift 12s ease-in-out infinite;}
+.v-orb-1{width:600px;height:400px;top:-200px;left:50%;transform:translateX(-50%);background:radial-gradient(ellipse,rgba(198,241,53,0.06) 0%,transparent 70%);}
+.v-orb-2{width:400px;height:400px;bottom:20%;right:-100px;background:radial-gradient(ellipse,rgba(0,229,255,0.04) 0%,transparent 70%);animation-delay:-4s;animation-duration:16s;}
+@keyframes orbDrift{0%,100%{transform:translateY(0) scale(1)}33%{transform:translateY(-30px) scale(1.05)}66%{transform:translateY(20px) scale(0.97)}}
 
-        /* Animated Border Container */
-        .profile-container {
-            position: relative;
-            padding: 3px;
-            border-radius: 24px;
-            background: linear-gradient(45deg, transparent, var(--border), transparent);
-            transition: 0.5s;
-        }
+.v-screen{display:none;position:relative;z-index:1;width:100%;max-width:480px;animation:vFadeUp 0.5s cubic-bezier(0.22,1,0.36,1) both;}
+.v-screen.active{display:flex;align-items:center;justify-content:center;}
+.v-screen-wide{max-width:600px;}
+@keyframes vFadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
 
-        .profile-container:hover {
-            background: linear-gradient(45deg, var(--accent), var(--gold), var(--accent-2));
-            box-shadow: 0 0 30px rgba(79, 172, 254, 0.3);
-        }
+.v-card{
+  width:100%;background:var(--bg-panel);border:1px solid var(--border-1);
+  border-radius:var(--radius-xl);padding:36px 32px;
+  display:flex;flex-direction:column;align-items:center;gap:18px;text-align:center;
+  box-shadow:0 40px 80px rgba(0,0,0,0.7),0 0 60px rgba(198,241,53,0.03);
+}
 
-        .profile-card {
-            background: #0d0d0d;
-            backdrop-filter: blur(20px);
-            border-radius: 22px;
-            padding: 50px 40px;
-            max-width: 450px;
-            width: 100%;
-            text-align: center;
-        }
+.v-step-pill{
+  display:flex;align-items:center;gap:8px;margin-bottom:4px;
+}
+.v-step-dot{
+  width:24px;height:24px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:9px;font-weight:700;
+  background:var(--bg-raised);border:1px solid var(--border-2);color:var(--text-3);
+  transition:all 0.3s;
+}
+.v-step-dot.done{background:var(--lime);border-color:var(--lime);color:#000;}
+.v-step-dot.active{background:var(--lime-glow);border-color:var(--lime-border);color:var(--lime);}
+.v-step-line{width:28px;height:1px;background:var(--border-2);}
 
-        .img-wrapper {
-            position: relative;
-            width: 130px;
-            height: 130px;
-            margin: 0 auto 25px;
-        }
+.v-badge{
+  font-family:var(--mono);font-size:9px;letter-spacing:0.2em;text-transform:uppercase;
+  background:var(--lime-glow);border:1px solid var(--lime-border);
+  border-radius:100px;padding:5px 14px;color:var(--lime);
+}
 
-        .profile-img {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid var(--border);
-            padding: 5px;
-            transition: 0.5s;
-        }
+.v-icon-wrap{position:relative;margin:4px 0;}
+.v-icon-glow{
+  position:absolute;inset:-16px;border-radius:50%;
+  background:radial-gradient(ellipse,rgba(198,241,53,0.1),transparent 70%);
+  animation:iconGlowPulse 2.5s ease-in-out infinite;
+}
+@keyframes iconGlowPulse{0%,100%{opacity:0.5;transform:scale(1)}50%{opacity:1;transform:scale(1.12)}}
+.v-icon-box{
+  width:80px;height:80px;border-radius:22px;
+  background:var(--bg-raised);border:1px solid var(--lime-border);
+  display:flex;align-items:center;justify-content:center;color:var(--lime);position:relative;z-index:1;
+}
+.v-icon-box svg{width:36px;height:36px;}
 
-        .profile-container:hover .profile-img {
-            border-color: var(--accent);
-            transform: scale(1.05);
-        }
+.v-eyebrow{font-family:var(--mono);font-size:9px;letter-spacing:0.25em;text-transform:uppercase;color:var(--lime);opacity:0.7;}
+.v-title{font-family:var(--display);font-size:clamp(26px,5vw,36px);letter-spacing:0.04em;line-height:1;color:var(--text-1);}
+.v-title em{color:var(--lime);font-style:normal;}
+.v-desc{font-family:var(--mono);font-size:10px;color:var(--text-3);line-height:1.8;letter-spacing:0.03em;max-width:320px;}
 
-        h1 {
-            font-weight: 800;
-            font-size: 32px;
-            letter-spacing: -1px;
-            margin-bottom: 5px;
-            background: linear-gradient(to right, #fff, #888);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+/* Timer ring */
+.v-ring-wrap{position:relative;width:110px;height:110px;flex-shrink:0;}
+.v-ring-svg{width:110px;height:110px;transform:rotate(-90deg);}
+.v-ring-bg{stroke:var(--bg-raised);}
+.v-ring-fg{stroke:var(--lime);transition:stroke-dashoffset 1s linear;}
+.v-ring-inner{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:2px;
+}
+.v-ring-num{font-family:var(--display);font-size:30px;color:var(--lime);line-height:1;}
+.v-ring-lbl{font-family:var(--mono);font-size:8px;color:var(--text-3);letter-spacing:0.15em;text-transform:uppercase;}
 
-        .alias {
-            font-size: 14px;
-            color: var(--accent);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 30px;
-            font-weight: 600;
-        }
+/* Status checks step 1 */
+.v-checks{width:100%;display:flex;flex-direction:column;gap:8px;}
+.v-check{
+  display:flex;align-items:center;gap:10px;
+  background:var(--bg-raised);border:1px solid var(--border-1);
+  border-radius:var(--radius-sm);padding:9px 14px;
+  font-family:var(--mono);font-size:10px;color:var(--text-3);letter-spacing:0.04em;
+  transition:all 0.3s;
+}
+.v-check.done{border-color:rgba(77,255,145,0.2);color:var(--text-2);}
+.v-check-icon{
+  width:18px;height:18px;border-radius:50%;border:1.5px solid var(--text-4);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.3s;
+}
+.v-check.done .v-check-icon{background:rgba(77,255,145,0.15);border-color:#4dff91;color:#4dff91;}
+.v-check-icon svg{width:10px;height:10px;stroke:currentColor;fill:none;stroke-width:2.5;}
+.v-check-label{flex:1;}
+.v-check-spin{
+  width:12px;height:12px;border-radius:50%;
+  border:1.5px solid var(--text-4);border-top-color:var(--lime);
+  animation:spin 0.8s linear infinite;flex-shrink:0;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
 
-        .section {
-            text-align: left;
-            margin-top: 30px;
-        }
+/* Step 2 scan bars */
+.v-scan-checks{width:100%;display:flex;flex-direction:column;gap:10px;}
+.v-scan-row{display:flex;flex-direction:column;gap:5px;}
+.v-scan-label{font-family:var(--mono);font-size:9px;color:var(--text-3);letter-spacing:0.08em;display:flex;justify-content:space-between;}
+.v-scan-track{height:3px;background:var(--bg-raised);border-radius:2px;overflow:hidden;}
+.v-scan-fill{height:100%;border-radius:2px;background:var(--cyan);width:0%;transition:width 0.4s ease;}
+.v-scan-pct{color:var(--cyan);}
 
-        .section-title {
-            font-size: 12px;
-            font-weight: 800;
-            color: rgba(255, 255, 255, 0.3);
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-        }
+/* Step 3 captcha grid */
+.v-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:8px;
+  width:100%;
+}
+.v-img-tile{
+  aspect-ratio:1;border-radius:var(--radius-md);overflow:hidden;
+  border:2px solid var(--border-1);cursor:pointer;position:relative;
+  transition:all 0.2s;background:var(--bg-raised);
+  display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;
+}
+.v-img-tile:hover{border-color:var(--border-2);transform:scale(1.02);}
+.v-img-tile.selected{border-color:var(--lime);box-shadow:0 0 0 1px var(--lime),0 0 20px rgba(198,241,53,0.15);}
+.v-img-tile.wrong{border-color:var(--red);box-shadow:0 0 0 1px var(--red);}
+.v-img-tile .v-tile-emoji{font-size:32px;line-height:1;}
+.v-img-tile .v-tile-label{font-family:var(--mono);font-size:8px;color:var(--text-3);letter-spacing:0.08em;text-transform:uppercase;}
+.v-tile-check{
+  position:absolute;top:6px;right:6px;width:20px;height:20px;
+  background:var(--lime);border-radius:50%;
+  display:none;align-items:center;justify-content:center;
+}
+.v-tile-check svg{width:11px;height:11px;stroke:#000;fill:none;stroke-width:3;}
+.v-img-tile.selected .v-tile-check{display:flex;}
 
-        .section-title::after {
-            content: "";
-            height: 1px;
-            flex-grow: 1;
-            background: var(--border);
-            margin-left: 15px;
-        }
+.v-captcha-row{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:4px;}
+.v-captcha-info{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;color:var(--text-3);letter-spacing:0.04em;}
+.v-captcha-info svg{flex-shrink:0;}
 
-        .info-list {
-            list-style: none;
-            font-size: 14px;
-            color: #ccc;
-            line-height: 2;
-        }
+.v-verify-btn{
+  display:inline-flex;align-items:center;gap:7px;
+  font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;
+  cursor:pointer;border:none;border-radius:var(--radius-sm);padding:10px 20px;
+  background:var(--lime);color:#000;transition:all 0.15s;flex-shrink:0;
+}
+.v-verify-btn:disabled{background:var(--bg-raised);color:var(--text-4);cursor:not-allowed;}
+.v-verify-btn:not(:disabled):hover{background:var(--lime-pale);}
+.v-verify-btn svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2.5;}
 
-        .info-list li {
-            padding-left: 20px;
-            position: relative;
-        }
+/* Step 3 wait state */
+.v-wait{
+  width:100%;display:flex;flex-direction:column;align-items:center;gap:14px;
+  padding-top:8px;
+}
+.v-wait-icon{
+  width:64px;height:64px;border-radius:18px;
+  background:rgba(255,179,64,0.08);border:1px solid rgba(255,179,64,0.2);
+  display:flex;align-items:center;justify-content:center;
+}
+.v-wait-icon svg{width:30px;height:30px;}
+.v-wait-title{font-family:var(--display);font-size:24px;letter-spacing:0.04em;color:var(--text-1);}
+.v-wait-desc{font-family:var(--mono);font-size:10px;color:var(--text-3);letter-spacing:0.04em;}
+.v-wait-track{width:100%;height:3px;background:var(--bg-raised);border-radius:2px;overflow:hidden;}
+.v-wait-fill{height:100%;background:linear-gradient(90deg,var(--lime),var(--cyan));border-radius:2px;width:0%;transition:width 0.4s ease;}
+.v-wait-lbl{font-family:var(--mono);font-size:9px;color:var(--text-3);letter-spacing:0.08em;}
 
-        .info-list li::before {
-            content: "→";
-            position: absolute;
-            left: 0;
-            color: var(--accent);
-        }
+/* ══════ MAIN PAGE ══════ */
+.bg-scene{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
+.bg-grid{position:absolute;inset:0;background-image:linear-gradient(var(--border-1) 1px,transparent 1px),linear-gradient(90deg,var(--border-1) 1px,transparent 1px);background-size:40px 40px;mask-image:radial-gradient(ellipse 80% 60% at 50% 0%,black 40%,transparent 100%);}
+.bg-orb{position:absolute;border-radius:50%;filter:blur(80px);animation:orbDrift 12s ease-in-out infinite;}
+.orb-1{width:600px;height:400px;top:-200px;left:50%;transform:translateX(-50%);background:radial-gradient(ellipse,rgba(198,241,53,0.06) 0%,transparent 70%);animation-delay:0s;}
+.orb-2{width:400px;height:400px;bottom:20%;right:-100px;background:radial-gradient(ellipse,rgba(0,229,255,0.04) 0%,transparent 70%);animation-delay:-4s;animation-duration:16s;}
+.orb-3{width:300px;height:300px;bottom:30%;left:-80px;background:radial-gradient(ellipse,rgba(198,241,53,0.03) 0%,transparent 70%);animation-delay:-8s;animation-duration:20s;}
+.bg-scan{position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px);pointer-events:none;}
 
-        .tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 15px;
-        }
+.page{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:40px 20px 60px;}
+.container{width:100%;max-width:860px;display:flex;flex-direction:column;gap:20px;}
 
-        .tag {
-            background: var(--glass);
-            border: 1px solid var(--border);
-            padding: 6px 14px;
-            border-radius: 8px;
-            font-size: 11px;
-            font-weight: 600;
-            color: #eee;
-            transition: 0.3s;
-        }
+.top-bar{display:flex;align-items:center;justify-content:space-between;padding:0 0 28px;border-bottom:1px solid var(--border-1);margin-bottom:8px;}
+.brand{display:flex;flex-direction:column;gap:2px;}
+.brand-eyebrow{font-family:var(--mono);font-size:9px;letter-spacing:0.25em;text-transform:uppercase;color:var(--lime);opacity:0.7;}
+.brand-name{font-family:var(--display);font-size:clamp(36px,6vw,52px);letter-spacing:0.06em;line-height:1;color:var(--text-1);}
+.brand-name em{color:var(--lime);font-style:normal;}
+.top-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px;}
+.live-badge{display:flex;align-items:center;gap:8px;background:rgba(198,241,53,0.07);border:1px solid var(--lime-border);border-radius:100px;padding:6px 14px 6px 10px;font-family:var(--mono);font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:var(--lime);}
+.pulse-ring{position:relative;width:8px;height:8px;flex-shrink:0;}
+.pulse-ring::before,.pulse-ring::after{content:'';position:absolute;inset:0;border-radius:50%;background:var(--lime);}
+.pulse-ring::after{animation:pingPulse 2s ease-out infinite;background:transparent;border:1px solid var(--lime);}
+@keyframes pingPulse{0%{transform:scale(1);opacity:1}100%{transform:scale(2.5);opacity:0}}
+.version-tag{font-family:var(--mono);font-size:9px;color:var(--text-3);letter-spacing:0.08em;}
 
-        .tag:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: var(--accent);
-        }
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+.stat-card{background:var(--bg-panel);border:1px solid var(--border-1);border-radius:var(--radius-md);padding:14px 16px;display:flex;flex-direction:column;gap:5px;transition:border-color 0.2s,background 0.2s;position:relative;overflow:hidden;}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--lime-border),transparent);opacity:0;transition:opacity 0.3s;}
+.stat-card:hover{border-color:var(--border-2);background:var(--bg-surface);}
+.stat-card:hover::before{opacity:1;}
+.stat-label{font-family:var(--mono);font-size:8px;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-3);}
+.stat-value{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--text-1);line-height:1;}
+.stat-value.accent{color:var(--lime);}
+.stat-value.ok{color:#4dff91;}
+.stat-value.err{color:var(--red);}
+.stat-value.warn{color:var(--amber);}
 
-        .shop-banner {
-            margin-top: 40px;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01));
-            border-radius: 16px;
-            padding: 20px;
-            border: 1px dashed var(--border);
-        }
+.vault-card{background:var(--bg-panel);border:1px solid var(--border-1);border-radius:var(--radius-xl);overflow:hidden;box-shadow:0 0 0 1px rgba(255,255,255,0.02),0 40px 80px rgba(0,0,0,0.6),0 0 60px rgba(198,241,53,0.02);transition:box-shadow 0.4s;}
+.vault-card:hover{box-shadow:0 0 0 1px rgba(255,255,255,0.04),0 40px 80px rgba(0,0,0,0.7),0 0 80px rgba(198,241,53,0.04);}
 
-        .shop-banner h3 {
-            font-size: 14px;
-            color: var(--gold);
-            margin-bottom: 12px;
-            text-transform: uppercase;
-        }
+.titlebar{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;background:var(--bg-surface);border-bottom:1px solid var(--border-1);gap:12px;}
+.titlebar-left{display:flex;align-items:center;gap:14px;}
+.wm-btns{display:flex;gap:6px;flex-shrink:0;}
+.wm-btn{width:11px;height:11px;border-radius:50%;cursor:pointer;transition:filter 0.15s;}
+.wm-btn:hover{filter:brightness(1.3);}
+.wm-close{background:#ff5f57;}.wm-min{background:#febc2e;}.wm-max{background:#28c840;}
+.divider-v{width:1px;height:16px;background:var(--border-2);flex-shrink:0;}
+.path-crumb{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;color:var(--text-3);letter-spacing:0.02em;min-width:0;overflow:hidden;}
+.crumb-sep{color:var(--text-4);}
+.crumb-file{color:var(--lime);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.titlebar-center{flex:1;display:flex;justify-content:center;}
+.tab-strip{display:flex;gap:2px;background:var(--bg-panel);border:1px solid var(--border-1);border-radius:var(--radius-sm);padding:3px;}
+.tab{font-family:var(--mono);font-size:9px;letter-spacing:0.08em;text-transform:uppercase;padding:5px 14px;border-radius:4px;cursor:pointer;color:var(--text-3);transition:all 0.15s;user-select:none;}
+.tab:hover{color:var(--text-2);background:var(--bg-hover);}
+.tab.active{background:var(--bg-raised);color:var(--lime);}
+.titlebar-right{display:flex;align-items:center;gap:8px;}
+.lang-chip{display:flex;align-items:center;gap:5px;background:var(--lime-glow);border:1px solid var(--lime-border);border-radius:var(--radius-sm);padding:4px 10px;font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--lime);}
+.lang-dot{width:5px;height:5px;border-radius:50%;background:var(--lime);}
 
-        .glitch-text {
-            color: #ff4b2b;
-            font-weight: 800;
-            font-size: 12px;
-            text-shadow: 0 0 10px rgba(255, 75, 43, 0.3);
-        }
-    </style>
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-family:var(--mono);font-size:9px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;border:1px solid transparent;border-radius:var(--radius-sm);padding:7px 14px;transition:all 0.15s ease;user-select:none;position:relative;overflow:hidden;white-space:nowrap;flex-shrink:0;}
+.btn::after{content:'';position:absolute;inset:0;opacity:0;background:rgba(255,255,255,0.05);transition:opacity 0.15s;}
+.btn:hover::after{opacity:1;}
+.btn:active{transform:scale(0.96);}
+.btn-lime{background:var(--lime);color:#0a0d06;border-color:transparent;font-weight:700;}
+.btn-lime:hover{background:var(--lime-pale);}
+.btn-lime.copied{background:#4dff91;color:#021408;}
+.btn-ghost{background:transparent;color:var(--text-2);border-color:var(--border-1);}
+.btn-ghost:hover{border-color:var(--border-2);color:var(--text-1);}
+.btn-danger{background:rgba(255,61,61,0.1);color:var(--red);border-color:rgba(255,61,61,0.2);}
+.btn-danger:hover{background:rgba(255,61,61,0.18);}
+.btn svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;}
+
+.toolbar{display:flex;align-items:center;justify-content:space-between;padding:10px 18px;background:var(--bg-raised);border-bottom:1px solid var(--border-1);gap:12px;}
+.toolbar-left,.toolbar-right{display:flex;align-items:center;gap:8px;}
+.search-input{display:flex;align-items:center;gap:7px;background:var(--bg-panel);border:1px solid var(--border-1);border-radius:var(--radius-sm);padding:6px 12px;font-family:var(--mono);font-size:10px;color:var(--text-2);transition:border-color 0.2s;cursor:text;}
+.search-input:focus-within{border-color:var(--lime-border);}
+.search-input input{background:none;border:none;outline:none;font-family:inherit;font-size:inherit;color:var(--text-1);width:150px;}
+.search-input input::placeholder{color:var(--text-3);}
+.search-input svg{width:11px;height:11px;stroke:var(--text-3);fill:none;stroke-width:2;flex-shrink:0;}
+
+.code-area{display:flex;position:relative;min-height:320px;max-height:520px;overflow:hidden;}
+.gutter{display:flex;flex-direction:column;padding:20px 0;background:var(--bg-surface);border-right:1px solid var(--border-1);min-width:54px;flex-shrink:0;overflow:hidden;user-select:none;}
+.line-no{font-family:var(--mono);font-size:11px;line-height:1.9;color:var(--text-4);text-align:right;padding:0 14px 0 8px;}
+.code-scroll-area{flex:1;overflow:auto;position:relative;}
+pre{margin:0;padding:20px 24px;min-height:100%;}
+code{font-family:var(--mono);font-size:12.5px;line-height:1.9;color:var(--text-1);white-space:pre;display:block;tab-size:2;}
+
+.loading-state{display:flex;flex-direction:column;gap:0;padding:24px;flex:1;}
+.skel-row{display:flex;align-items:center;gap:12px;padding:5px 0;}
+.skel-num{width:28px;height:8px;border-radius:3px;background:var(--bg-raised);flex-shrink:0;}
+.skel-line{height:8px;border-radius:3px;background:linear-gradient(90deg,var(--bg-raised) 0%,var(--bg-hover) 40%,var(--bg-raised) 80%);background-size:300% 100%;animation:shimmerAnim 1.6s linear infinite;}
+@keyframes shimmerAnim{0%{background-position:100% 0}100%{background-position:-100% 0}}
+
+.empty-state{display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:70px 40px;text-align:center;min-height:280px;}
+.empty-icon-wrap{position:relative;}
+.empty-icon-bg{width:72px;height:72px;border-radius:20px;background:var(--bg-surface);border:1px solid var(--border-1);display:flex;align-items:center;justify-content:center;}
+.empty-icon-bg svg{width:30px;height:30px;stroke:var(--text-3);fill:none;stroke-width:1.5;}
+.empty-glow{position:absolute;inset:-12px;border-radius:28px;background:radial-gradient(ellipse,rgba(198,241,53,0.06),transparent 70%);animation:emptyGlow 3s ease-in-out infinite;}
+@keyframes emptyGlow{0%,100%{opacity:0.5;transform:scale(1)}50%{opacity:1;transform:scale(1.1)}}
+.empty-title{font-size:15px;font-weight:600;color:var(--text-2);}
+.empty-sub{font-family:var(--mono);font-size:10px;color:var(--text-3);letter-spacing:0.06em;max-width:260px;line-height:1.7;}
+
+.error-state{display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:60px 40px;text-align:center;min-height:280px;}
+.error-icon-wrap{width:64px;height:64px;border-radius:18px;background:rgba(255,61,61,0.08);border:1px solid rgba(255,61,61,0.18);display:flex;align-items:center;justify-content:center;}
+.error-icon-wrap svg{width:28px;height:28px;stroke:var(--red);fill:none;stroke-width:1.5;}
+.error-code{font-family:var(--mono);font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--red);opacity:0.7;}
+.error-title{font-size:16px;font-weight:700;color:var(--text-1);}
+.error-detail{font-family:var(--mono);font-size:10px;color:var(--text-3);letter-spacing:0.04em;line-height:1.8;max-width:300px;}
+.error-detail strong{color:var(--text-2);font-weight:normal;}
+.error-actions,.empty-actions{display:flex;gap:8px;margin-top:4px;}
+
+.statusbar{display:flex;align-items:center;justify-content:space-between;padding:8px 18px;background:var(--bg-surface);border-top:1px solid var(--border-1);gap:8px;}
+.sb-left,.sb-right{display:flex;align-items:center;gap:16px;}
+.sb-item{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;color:var(--text-3);letter-spacing:0.06em;white-space:nowrap;}
+.sb-item svg{width:10px;height:10px;stroke:currentColor;fill:none;stroke-width:2;}
+.sb-item.ok{color:#4dff91;}.sb-item.err{color:var(--red);}
+.sb-sep{width:1px;height:10px;background:var(--border-1);}
+.progress-bar-wrap{flex:1;max-width:200px;height:2px;background:var(--bg-raised);border-radius:2px;overflow:hidden;display:none;}
+.progress-bar{height:100%;background:var(--lime);border-radius:2px;width:0%;transition:width 0.3s ease;}
+
+.toast-container{position:fixed;bottom:28px;right:28px;z-index:10000;display:flex;flex-direction:column;gap:8px;pointer-events:none;}
+.toast{display:flex;align-items:center;gap:10px;background:var(--bg-raised);border:1px solid var(--border-2);border-radius:var(--radius-md);padding:12px 16px;font-family:var(--mono);font-size:10px;color:var(--text-1);letter-spacing:0.04em;box-shadow:0 8px 32px rgba(0,0,0,0.5);pointer-events:auto;transform:translateX(20px);opacity:0;transition:all 0.25s cubic-bezier(0.34,1.56,0.64,1);max-width:300px;}
+.toast.show{transform:translateX(0);opacity:1;}
+.toast-icon{width:20px;height:20px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.toast-icon svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2.5;}
+.toast.success .toast-icon{background:rgba(77,255,145,0.15);color:#4dff91;}
+.toast.error .toast-icon{background:rgba(255,61,61,0.15);color:var(--red);}
+.toast.info .toast-icon{background:rgba(0,229,255,0.1);color:var(--cyan);}
+.toast-msg{flex:1;line-height:1.4;}
+.toast-time{font-size:8px;color:var(--text-3);align-self:flex-end;}
+
+.page-footer{display:flex;align-items:center;justify-content:space-between;padding-top:10px;gap:12px;}
+.footer-left{display:flex;align-items:center;gap:16px;font-family:var(--mono);font-size:9px;color:var(--text-4);letter-spacing:0.08em;}
+.footer-right{font-family:var(--mono);font-size:9px;color:var(--text-4);letter-spacing:0.06em;}
+
+.copy-flash{position:fixed;inset:0;z-index:900;pointer-events:none;border:2px solid var(--lime);opacity:0;}
+.copy-flash.fire{animation:flashAnim 0.5s ease-out forwards;}
+@keyframes flashAnim{0%{opacity:0.7}100%{opacity:0}}
+
+.tok-kw{color:var(--lime)}.tok-fn{color:#7dd3fc}.tok-str{color:#fda4af}
+.tok-cmt{color:var(--text-3);font-style:italic}.tok-num{color:#fbbf24}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.container>*{animation:fadeUp 0.5s cubic-bezier(0.22,1,0.36,1) both;}
+.top-bar{animation-delay:0.05s}.stat-row{animation-delay:0.12s}.vault-card{animation-delay:0.20s}.page-footer{animation-delay:0.28s}
+
+@media(max-width:640px){
+  .stat-row{grid-template-columns:repeat(2,1fr);}
+  .titlebar-center{display:none;}
+  .search-input{display:none;}
+  .brand-name{font-size:32px;}
+  .top-bar{flex-direction:column;align-items:flex-start;gap:12px;}
+  .top-right{align-items:flex-start;}
+  .v-card{padding:24px 18px;}
+  .v-grid{grid-template-columns:repeat(3,1fr);}
+}
+</style>
 </head>
 <body>
 
-    <div class="profile-container">
-        <div class="profile-card">
-            <div class="img-wrapper">
-                <img src="https://files.catbox.moe/mcohgl.jpg" alt="BahrulXyzet" class="profile-img">
-            </div>
-            
-            <h1>Kimiro Thermal</h1>
-            <div class="alias">@kimiro • Senior Developer</div>
+<!-- ══════ VERIFY OVERLAY ══════ -->
+<div id="verifyOverlay">
+  <!-- ambient bg for overlay -->
+  <div class="v-bg-grid"></div>
+  <div class="v-orb v-orb-1"></div>
+  <div class="v-orb v-orb-2"></div>
 
-            <div class="tags" style="justify-content: center;">
-                <span class="tag">Node.js</span>
-                <span class="tag">System Arch</span>
-                <span class="tag">Automation</span>
-            </div>
+  <!-- step indicators (shared) -->
+  <div style="position:fixed;top:24px;left:50%;transform:translateX(-50%);z-index:2;display:flex;align-items:center;gap:0;" id="stepIndicator">
+    <div class="v-step-dot active" id="sdot1">1</div>
+    <div class="v-step-line"></div>
+    <div class="v-step-dot" id="sdot2">2</div>
+    <div class="v-step-line"></div>
+    <div class="v-step-dot" id="sdot3">3</div>
+  </div>
 
-            <div class="section">
-                <div class="section-title">Professional Expertise</div>
-                <ul class="info-list">
-                    <li>Specialist Messaging Automation (WA/TG)</li>
-                    <li>System & Hardware Performance Tuning</li>
-                    <li>Pterodactyl Infrastructure Management</li>
-                </ul>
-            </div>
+  <!-- ── STEP 1: Verifikasi Manusia 10s ── -->
+  <div class="v-screen active" id="vStep1">
+    <div class="v-card">
+      <div class="v-badge">TAHAP 1 / 3 &nbsp;·&nbsp; VERIFIKASI MANUSIA</div>
 
-            <div class="section">
-                <div class="section-title">Activities & Hobbies</div>
-                <ul class="info-list">
-                    <li>Architecting Kimiro Thermal Projects</li>
-                    <li>UI/UX Design (HTML & CSS Enthusiast)</li>
-                    <li>Cross-platform Dev (Flutter & Web-to-APK)</li>
-                </ul>
-            </div>
-
-            <div class="shop-banner">
-                <h3>Exclusive Services</h3>
-                <div class="glitch-text">
-                    APK BUG • SC BUG • MURBUG
-                </div>
-            </div>
+      <div class="v-icon-wrap">
+        <div class="v-icon-glow"></div>
+        <div class="v-icon-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <path d="M9 12l2 2 4-4"/>
+          </svg>
         </div>
+      </div>
+
+      <div class="v-eyebrow">// SECURITY CHECK</div>
+      <div class="v-title">Verifikasi <em>Manusia</em></div>
+      <div class="v-desc">Sistem sedang memverifikasi bahwa Anda adalah manusia. Harap tunggu proses analisis selesai sepenuhnya.</div>
+
+      <div class="v-ring-wrap">
+        <svg class="v-ring-svg" viewBox="0 0 100 100">
+          <circle class="v-ring-bg" cx="50" cy="50" r="42" fill="none" stroke-width="4"/>
+          <circle class="v-ring-fg" id="ring1" cx="50" cy="50" r="42" fill="none" stroke-width="4"
+            stroke-dasharray="263.9" stroke-dashoffset="0" stroke-linecap="round"/>
+        </svg>
+        <div class="v-ring-inner">
+          <div class="v-ring-num" id="timer1">10</div>
+          <div class="v-ring-lbl">detik</div>
+        </div>
+      </div>
+
+      <div class="v-checks" id="checks1">
+        <div class="v-check" id="vc1a">
+          <div class="v-check-icon"><div class="v-check-spin"></div></div>
+          <div class="v-check-label">Analisis fingerprint browser</div>
+        </div>
+        <div class="v-check" id="vc1b">
+          <div class="v-check-icon"><div class="v-check-spin" style="animation-delay:0.3s"></div></div>
+          <div class="v-check-label">Deteksi pola perilaku pengguna</div>
+        </div>
+        <div class="v-check" id="vc1c">
+          <div class="v-check-icon"><div class="v-check-spin" style="animation-delay:0.6s"></div></div>
+          <div class="v-check-label">Validasi sesi & enkripsi token</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── STEP 2: Bukan Robot 7s ── -->
+  <div class="v-screen" id="vStep2">
+    <div class="v-card">
+      <div class="v-badge" style="background:rgba(0,229,255,0.08);border-color:rgba(0,229,255,0.2);color:var(--cyan);">TAHAP 2 / 3 &nbsp;·&nbsp; DETEKSI BOT</div>
+
+      <div class="v-icon-wrap">
+        <div class="v-icon-glow" style="background:radial-gradient(ellipse,rgba(0,229,255,0.1),transparent 70%);"></div>
+        <div class="v-icon-box" style="border-color:rgba(0,229,255,0.25);color:var(--cyan);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="3" y="11" width="18" height="11" rx="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            <circle cx="12" cy="16" r="1.5" fill="currentColor"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="v-eyebrow" style="color:var(--cyan);">// ROBOT DETECTION</div>
+      <div class="v-title">Anda Bukan <em style="color:var(--cyan);">Robot?</em></div>
+      <div class="v-desc">Sistem menganalisis pola interaksi Anda secara mendalam. Proses ini memastikan keamanan akses repositori terenkripsi.</div>
+
+      <div class="v-ring-wrap">
+        <svg class="v-ring-svg" viewBox="0 0 100 100">
+          <circle class="v-ring-bg" cx="50" cy="50" r="42" fill="none" stroke-width="4"/>
+          <circle class="v-ring-fg" id="ring2" cx="50" cy="50" r="42" fill="none" stroke-width="4"
+            stroke-dasharray="263.9" stroke-dashoffset="0" stroke-linecap="round" style="stroke:var(--cyan)"/>
+        </svg>
+        <div class="v-ring-inner">
+          <div class="v-ring-num" id="timer2" style="color:var(--cyan);">7</div>
+          <div class="v-ring-lbl">detik</div>
+        </div>
+      </div>
+
+      <div class="v-scan-checks" id="scanChecks">
+        <div class="v-scan-row">
+          <div class="v-scan-label"><span>Fingerprint analysis</span><span class="v-scan-pct" id="sp1">0%</span></div>
+          <div class="v-scan-track"><div class="v-scan-fill" id="sf1"></div></div>
+        </div>
+        <div class="v-scan-row">
+          <div class="v-scan-label"><span>Mouse pattern detection</span><span class="v-scan-pct" id="sp2">0%</span></div>
+          <div class="v-scan-track"><div class="v-scan-fill" id="sf2"></div></div>
+        </div>
+        <div class="v-scan-row">
+          <div class="v-scan-label"><span>Request signature check</span><span class="v-scan-pct" id="sp3">0%</span></div>
+          <div class="v-scan-track"><div class="v-scan-fill" id="sf3"></div></div>
+        </div>
+        <div class="v-scan-row">
+          <div class="v-scan-label"><span>Entropy validation</span><span class="v-scan-pct" id="sp4">0%</span></div>
+          <div class="v-scan-track"><div class="v-scan-fill" id="sf4"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── STEP 3: Image CAPTCHA + Wait 8s ── -->
+  <div class="v-screen" id="vStep3" style="max-width:560px;">
+    <div class="v-card" style="gap:14px;">
+
+      <!-- captcha section -->
+      <div id="captchaSection" style="width:100%;display:flex;flex-direction:column;align-items:center;gap:14px;">
+        <div class="v-badge" style="background:rgba(255,179,64,0.08);border-color:rgba(255,179,64,0.22);color:var(--amber);">TAHAP 3 / 3 &nbsp;·&nbsp; CAPTCHA GAMBAR</div>
+
+        <div class="v-icon-wrap">
+          <div class="v-icon-glow" style="background:radial-gradient(ellipse,rgba(255,179,64,0.1),transparent 70%);"></div>
+          <div class="v-icon-box" style="border-color:rgba(255,179,64,0.25);color:var(--amber);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <circle cx="8.5" cy="8.5" r="1.5"/>
+              <polyline points="21 15 16 10 5 21"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="v-eyebrow" style="color:var(--amber);">// IMAGE VERIFICATION</div>
+        <div class="v-title">Pilih Gambar <em style="color:var(--amber);">yang Benar</em></div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--text-2);letter-spacing:0.04em;background:var(--bg-raised);border:1px solid var(--border-1);border-radius:var(--radius-sm);padding:10px 16px;width:100%;text-align:center;" id="captchaQ">
+          Pilih semua gambar yang menunjukkan: <strong style="color:var(--amber);" id="captchaTarget">—</strong>
+        </div>
+
+        <div class="v-grid" id="captchaGrid"></div>
+
+        <div class="v-captcha-row" style="width:100%;">
+          <div class="v-captcha-info">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:11px;height:11px;flex-shrink:0;opacity:0.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span id="captchaMsg">Klik gambar yang sesuai lalu tekan Verifikasi</span>
+          </div>
+          <button class="v-verify-btn" id="verifyCaptchaBtn" disabled>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Verifikasi
+          </button>
+        </div>
+      </div>
+
+      <!-- wait section (hidden until captcha passed) -->
+      <div id="waitSection" style="display:none;width:100%;flex-direction:column;align-items:center;gap:16px;padding:8px 0;">
+        <div style="width:64px;height:64px;border-radius:18px;background:rgba(77,255,145,0.08);border:1px solid rgba(77,255,145,0.2);display:flex;align-items:center;justify-content:center;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#4dff91" stroke-width="1.5" style="width:30px;height:30px;">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <polyline points="9 12 11 14 15 10"/>
+          </svg>
+        </div>
+        <div style="font-family:var(--display);font-size:26px;letter-spacing:0.04em;color:var(--text-1);">Verifikasi <span style="color:#4dff91;">Berhasil!</span></div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--text-3);letter-spacing:0.04em;text-align:center;">Mempersiapkan akses aman ke repositori terenkripsi...</div>
+        <div style="width:100%;height:3px;background:var(--bg-raised);border-radius:2px;overflow:hidden;">
+          <div id="waitBar" style="height:100%;background:linear-gradient(90deg,var(--lime),var(--cyan));border-radius:2px;width:0%;transition:width 0.35s ease;"></div>
+        </div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--text-3);letter-spacing:0.1em;text-transform:uppercase;" id="waitLbl">Membuka dalam 8 detik...</div>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /verifyOverlay -->
+
+<!-- ══════ MAIN PAGE (hidden until verified) ══════ -->
+<div id="mainPage" style="display:none;">
+
+<div class="bg-scene">
+  <div class="bg-grid"></div>
+  <div class="bg-orb orb-1"></div>
+  <div class="bg-orb orb-2"></div>
+  <div class="bg-orb orb-3"></div>
+  <div class="bg-scan"></div>
+</div>
+
+<div class="page">
+<div class="container">
+
+  <div class="top-bar">
+    <div class="brand">
+      <div class="brand-eyebrow">// secure code repository</div>
+      <div class="brand-name">CODE<em>VAULT</em></div>
+    </div>
+    <div class="top-right">
+      <div class="live-badge"><div class="pulse-ring"></div>LIVE SYNC</div>
+      <div class="version-tag">v3.0.0 · encrypted channel</div>
+    </div>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat-card"><div class="stat-label">Connection</div><div class="stat-value accent" id="statConn">—</div></div>
+    <div class="stat-card"><div class="stat-label">Lines</div><div class="stat-value" id="statLines">—</div></div>
+    <div class="stat-card"><div class="stat-label">File Size</div><div class="stat-value" id="statSize">—</div></div>
+    <div class="stat-card"><div class="stat-label">Last Sync</div><div class="stat-value" id="statTime">—</div></div>
+  </div>
+
+  <div class="vault-card">
+    <div class="titlebar">
+      <div class="titlebar-left">
+        <div class="wm-btns">
+          <div class="wm-btn wm-close"></div>
+          <div class="wm-btn wm-min"></div>
+          <div class="wm-btn wm-max"></div>
+        </div>
+        <div class="divider-v"></div>
+        <div class="path-crumb">
+          <span>github</span><span class="crumb-sep">/</span>
+          <span>XElaraa-Bail</span><span class="crumb-sep">/</span>
+          <span>my-appp</span><span class="crumb-sep">/</span>
+          <span class="crumb-file" id="crumbFile">func.txt</span>
+        </div>
+      </div>
+      <div class="titlebar-center">
+        <div class="tab-strip">
+          <div class="tab active" data-tab="code">Code</div>
+          <div class="tab" data-tab="raw">Raw</div>
+          <div class="tab" data-tab="info">Info</div>
+        </div>
+      </div>
+      <div class="titlebar-right">
+        <div class="lang-chip"><div class="lang-dot"></div><span id="langLabel">TXT</span></div>
+        <button class="btn btn-ghost" id="refreshBtn">
+          <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+          Sync
+        </button>
+        <button class="btn btn-lime" id="copyBtn">
+          <svg id="copyIcon" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          <svg id="checkIcon" viewBox="0 0 24 24" style="display:none"><polyline points="20 6 9 17 4 12"/></svg>
+          <span id="copyLabel">Copy Code</span>
+        </button>
+      </div>
     </div>
 
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <div class="search-input">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" placeholder="search in file..." id="searchInput" spellcheck="false">
+        </div>
+        <button class="btn btn-ghost" id="wrapBtn">
+          <svg viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+          Wrap
+        </button>
+      </div>
+      <div class="toolbar-right">
+        <button class="btn btn-ghost" id="expandBtn">
+          <svg viewBox="0 0 24 24"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+          Expand
+        </button>
+        <button class="btn btn-ghost" id="selectAllBtn">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Select All
+        </button>
+      </div>
+    </div>
+
+    <div class="code-area" id="codeArea">
+      <div class="gutter" id="gutter"></div>
+      <div class="loading-state" id="loadingState">
+        <div class="skel-row"><div class="skel-num"></div><div class="skel-line" style="width:52%"></div></div>
+        <div class="skel-row"><div class="skel-num"></div><div class="skel-line" style="width:78%"></div></div>
+        <div class="skel-row"><div class="skel-num"></div><div class="skel-line" style="width:36%"></div></div>
+        <div class="skel-row"><div class="skel-num"></div><div class="skel-line" style="width:64%"></div></div>
+        <div class="skel-row"><div class="skel-num"></div><div class="skel-line" style="width:88%"></div></div>
+        <div class="skel-row"><div class="skel-num"></div><div class="skel-line" style="width:45%"></div></div>
+        <div class="skel-row"><div class="skel-num"></div><div class="skel-line" style="width:71%"></div></div>
+        <div class="skel-row"><div class="skel-num"></div><div class="skel-line" style="width:83%"></div></div>
+      </div>
+      <div class="code-scroll-area" id="codeScrollArea" style="display:none">
+        <pre><code id="codeEl"></code></pre>
+      </div>
+      <div class="empty-state" id="emptyState">
+        <div class="empty-icon-wrap">
+          <div class="empty-glow"></div>
+          <div class="empty-icon-bg"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+        </div>
+        <div class="empty-title">No data loaded</div>
+        <div class="empty-sub">Configure a valid GitHub raw URL and press Sync</div>
+        <div class="empty-actions"><button class="btn btn-ghost" id="emptyRetryBtn"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>Try Again</button></div>
+      </div>
+      <div class="error-state" id="errorState">
+        <div class="error-icon-wrap"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+        <div class="error-code" id="errorCode">ERR_CONNECTION</div>
+        <div class="error-title">Failed to fetch</div>
+        <div class="error-detail" id="errorDetail">Unable to reach repository.</div>
+        <div class="error-actions">
+          <button class="btn btn-ghost" id="errRetryBtn"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>Retry</button>
+          <button class="btn btn-danger" id="errClearBtn"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>Clear</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="statusbar">
+      <div class="sb-left">
+        <div class="sb-item" id="sbStatus"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span id="sbStatusText">Idle</span></div>
+        <div class="sb-sep"></div>
+        <div class="sb-item"><svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg><span id="sbLines">0 lines</span></div>
+        <div class="sb-sep"></div>
+        <div class="sb-item"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>UTF-8</div>
+        <div class="sb-sep"></div>
+        <div class="sb-item"><svg viewBox="0 0 24 24"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg><span id="sbSizeText">—</span></div>
+      </div>
+      <div class="sb-right">
+        <div class="progress-bar-wrap" id="progressWrap"><div class="progress-bar" id="progressBar"></div></div>
+        <div class="sb-sep"></div>
+        <div class="sb-item"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span id="sbFetchTime">—</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <div class="footer-left"><span>VAULT // SECURE REPOSITORY</span><span>·</span><span>v3.0.0</span><span>·</span><span id="ftTime">—</span></div>
+    <div class="footer-right">access granted · verified session</div>
+  </div>
+
+</div>
+</div>
+</div><!-- /mainPage -->
+
+<div class="toast-container" id="toastContainer"></div>
+<div class="copy-flash" id="copyFlash"></div>
+
+<script>
+'use strict';
+
+/* ══════════════════════════════
+   VERIFICATION ENGINE
+══════════════════════════════ */
+
+// Captcha data
+const CAPTCHA_DATA = [
+  {
+    question: 'GEMBOK / KUNCI',
+    correct: [0,2,5],
+    tiles: [
+      {emoji:'🔒',label:'Gembok'},
+      {emoji:'🌸',label:'Bunga'},
+      {emoji:'🗝️',label:'Kunci'},
+      {emoji:'🚀',label:'Roket'},
+      {emoji:'🍎',label:'Apel'},
+      {emoji:'🔑',label:'Kunci'},
+      {emoji:'⭐',label:'Bintang'},
+      {emoji:'🌙',label:'Bulan'},
+      {emoji:'🦋',label:'Kupu'},
+    ]
+  },
+  {
+    question: 'PERISAI / KEAMANAN',
+    correct: [1,4,7],
+    tiles: [
+      {emoji:'🎵',label:'Musik'},
+      {emoji:'🛡️',label:'Perisai'},
+      {emoji:'🌴',label:'Pohon'},
+      {emoji:'🎯',label:'Target'},
+      {emoji:'⚔️',label:'Pedang'},
+      {emoji:'🌊',label:'Ombak'},
+      {emoji:'🎪',label:'Tenda'},
+      {emoji:'🔐',label:'Aman'},
+      {emoji:'🌈',label:'Pelangi'},
+    ]
+  }
+];
+
+const captchaSet = CAPTCHA_DATA[Math.floor(Math.random() * CAPTCHA_DATA.length)];
+let selectedTiles = new Set();
+
+function buildCaptchaGrid() {
+  document.getElementById('captchaTarget').textContent = captchaSet.question;
+  const grid = document.getElementById('captchaGrid');
+  grid.innerHTML = '';
+  captchaSet.tiles.forEach((tile, i) => {
+    const div = document.createElement('div');
+    div.className = 'v-img-tile';
+    div.innerHTML = `
+      <div class="v-tile-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <div class="v-tile-emoji">${tile.emoji}</div>
+      <div class="v-tile-label">${tile.label}</div>
+    `;
+    div.addEventListener('click', () => {
+      if (selectedTiles.has(i)) {
+        selectedTiles.delete(i);
+        div.classList.remove('selected');
+      } else {
+        selectedTiles.add(i);
+        div.classList.add('selected');
+      }
+      document.getElementById('verifyCaptchaBtn').disabled = selectedTiles.size === 0;
+      document.getElementById('captchaMsg').textContent =
+        selectedTiles.size > 0
+          ? `${selectedTiles.size} gambar dipilih`
+          : 'Klik gambar yang sesuai lalu tekan Verifikasi';
+    });
+    grid.appendChild(div);
+  });
+}
+
+function checkCaptcha() {
+  const correct = new Set(captchaSet.correct);
+  const tiles = document.querySelectorAll('.v-img-tile');
+  let allCorrect = true;
+
+  tiles.forEach((tile, i) => {
+    if (selectedTiles.has(i) && !correct.has(i)) {
+      tile.classList.add('wrong');
+      allCorrect = false;
+    }
+  });
+
+  const missedCorrect = captchaSet.correct.some(i => !selectedTiles.has(i));
+  if (missedCorrect) allCorrect = false;
+
+  if (!allCorrect) {
+    document.getElementById('captchaMsg').textContent = '❌ Pilihan tidak tepat, coba lagi';
+    setTimeout(() => {
+      tiles.forEach(t => t.classList.remove('wrong','selected'));
+      selectedTiles.clear();
+      document.getElementById('verifyCaptchaBtn').disabled = true;
+      document.getElementById('captchaMsg').textContent = 'Klik gambar yang sesuai lalu tekan Verifikasi';
+    }, 1200);
+    return;
+  }
+
+  // correct — show wait
+  document.getElementById('captchaSection').style.display = 'none';
+  const waitSec = document.getElementById('waitSection');
+  waitSec.style.display = 'flex';
+  startWait8();
+}
+
+function startWait8() {
+  const bar = document.getElementById('waitBar');
+  const lbl = document.getElementById('waitLbl');
+  let sec = 8;
+  lbl.textContent = `Membuka dalam ${sec} detik...`;
+  const total = 8000;
+  const start = Date.now();
+
+  const interval = setInterval(() => {
+    const elapsed = Date.now() - start;
+    const pct = Math.min((elapsed / total) * 100, 100);
+    bar.style.width = pct + '%';
+    sec = Math.max(0, Math.ceil((total - elapsed) / 1000));
+    lbl.textContent = sec > 0 ? `Membuka dalam ${sec} detik...` : 'Memuat halaman...';
+    if (elapsed >= total) {
+      clearInterval(interval);
+      launchMain();
+    }
+  }, 80);
+}
+
+function launchMain() {
+  const overlay = document.getElementById('verifyOverlay');
+  overlay.style.transition = 'opacity 0.6s ease';
+  overlay.style.opacity = '0';
+  setTimeout(() => {
+    overlay.style.display = 'none';
+    const main = document.getElementById('mainPage');
+    main.style.display = 'block';
+    main.style.opacity = '0';
+    main.style.transition = 'opacity 0.5s ease';
+    setTimeout(() => { main.style.opacity = '1'; }, 30);
+    initVault();
+  }, 600);
+}
+
+// Update step dots
+function setStepDot(step) {
+  for (let i = 1; i <= 3; i++) {
+    const dot = document.getElementById('sdot' + i);
+    dot.classList.remove('active','done');
+    if (i < step) dot.classList.add('done');
+    else if (i === step) dot.classList.add('active');
+  }
+}
+
+// Step 1: 10s human check
+function runStep1() {
+  setStepDot(1);
+  const TOTAL = 10;
+  const circumference = 263.9;
+  const ring = document.getElementById('ring1');
+  const timerEl = document.getElementById('timer1');
+  const checks = [
+    {el: document.getElementById('vc1a'), delay: 2500},
+    {el: document.getElementById('vc1b'), delay: 5500},
+    {el: document.getElementById('vc1c'), delay: 8000},
+  ];
+
+  let remaining = TOTAL;
+  const start = Date.now();
+
+  checks.forEach(c => {
+    setTimeout(() => {
+      c.el.classList.add('done');
+      const icon = c.el.querySelector('.v-check-icon');
+      icon.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>';
+    }, c.delay);
+  });
+
+  const tick = setInterval(() => {
+    const elapsed = (Date.now() - start) / 1000;
+    remaining = Math.max(0, TOTAL - elapsed);
+    const pct = elapsed / TOTAL;
+    ring.style.strokeDashoffset = circumference * pct;
+    timerEl.textContent = Math.ceil(remaining);
+
+    if (remaining <= 0) {
+      clearInterval(tick);
+      switchStep(1, 2);
+    }
+  }, 50);
+}
+
+// Step 2: 7s robot check with scan bars
+function runStep2() {
+  setStepDot(2);
+  const TOTAL = 7;
+  const circumference = 263.9;
+  const ring = document.getElementById('ring2');
+  const timerEl = document.getElementById('timer2');
+
+  const bars = [
+    {fill: document.getElementById('sf1'), pct: document.getElementById('sp1'), delay: 0, speed: 1.1},
+    {fill: document.getElementById('sf2'), pct: document.getElementById('sp2'), delay: 800, speed: 0.9},
+    {fill: document.getElementById('sf3'), pct: document.getElementById('sp3'), delay: 1800, speed: 1.3},
+    {fill: document.getElementById('sf4'), pct: document.getElementById('sp4'), delay: 2800, speed: 0.8},
+  ];
+
+  bars.forEach(b => {
+    setTimeout(() => {
+      let v = 0;
+      const bTick = setInterval(() => {
+        v = Math.min(100, v + b.speed * 1.5 + Math.random() * 2);
+        b.fill.style.width = v + '%';
+        b.pct.textContent = Math.round(v) + '%';
+        if (v >= 100) clearInterval(bTick);
+      }, 50);
+    }, b.delay);
+  });
+
+  let remaining = TOTAL;
+  const start = Date.now();
+
+  const tick = setInterval(() => {
+    const elapsed = (Date.now() - start) / 1000;
+    remaining = Math.max(0, TOTAL - elapsed);
+    const pct = elapsed / TOTAL;
+    ring.style.strokeDashoffset = circumference * pct;
+    timerEl.textContent = Math.ceil(remaining);
+
+    if (remaining <= 0) {
+      clearInterval(tick);
+      switchStep(2, 3);
+    }
+  }, 50);
+}
+
+// Step 3: captcha
+function runStep3() {
+  setStepDot(3);
+  buildCaptchaGrid();
+  document.getElementById('verifyCaptchaBtn').addEventListener('click', checkCaptcha);
+}
+
+function switchStep(from, to) {
+  const fromEl = document.getElementById('vStep' + from);
+  const toEl   = document.getElementById('vStep' + to);
+
+  fromEl.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+  fromEl.style.opacity = '0';
+  fromEl.style.transform = 'translateY(-16px)';
+
+  setTimeout(() => {
+    fromEl.classList.remove('active');
+    fromEl.style.display = 'none';
+    toEl.style.display = 'flex';
+    toEl.style.opacity = '0';
+    toEl.style.transform = 'translateY(20px)';
+    toEl.classList.add('active');
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        toEl.style.transition = 'opacity 0.45s ease, transform 0.45s ease';
+        toEl.style.opacity = '1';
+        toEl.style.transform = 'translateY(0)';
+      });
+    });
+    if (to === 2) runStep2();
+    else if (to === 3) runStep3();
+  }, 400);
+}
+
+/* ══════════════════════════════
+   VAULT ENGINE
+══════════════════════════════ */
+const CONFIG = {
+  url: 'https://raw.githubusercontent.com/XElaraa-Bail/my-appp/refs/heads/main/func.txt',
+  retryLimit: 3,
+  retryDelay: 1200,
+};
+
+const state = {
+  rawText:'',lineCount:0,wordWrap:false,
+  expanded:false,fetching:false,retryCount:0,fetchStart:0
+};
+
+function $(id){return document.getElementById(id);}
+
+const el = {
+  statConn:$('statConn'),statLines:$('statLines'),statSize:$('statSize'),statTime:$('statTime'),
+  loadingState:$('loadingState'),codeScrollArea:$('codeScrollArea'),
+  emptyState:$('emptyState'),errorState:$('errorState'),
+  codeEl:$('codeEl'),gutter:$('gutter'),codeArea:$('codeArea'),
+  copyBtn:$('copyBtn'),copyIcon:$('copyIcon'),checkIcon:$('checkIcon'),copyLabel:$('copyLabel'),
+  refreshBtn:$('refreshBtn'),expandBtn:$('expandBtn'),wrapBtn:$('wrapBtn'),selectAllBtn:$('selectAllBtn'),
+  emptyRetryBtn:$('emptyRetryBtn'),errRetryBtn:$('errRetryBtn'),errClearBtn:$('errClearBtn'),
+  sbStatusText:$('sbStatusText'),sbStatus:$('sbStatus'),sbLines:$('sbLines'),
+  sbSizeText:$('sbSizeText'),sbFetchTime:$('sbFetchTime'),
+  progressWrap:$('progressWrap'),progressBar:$('progressBar'),
+  crumbFile:$('crumbFile'),langLabel:$('langLabel'),
+  errorCode:$('errorCode'),errorDetail:$('errorDetail'),
+  searchInput:$('searchInput'),copyFlash:$('copyFlash'),
+  toastCont:$('toastContainer'),ftTime:$('ftTime'),
+};
+
+function formatBytes(b){
+  if(!b)return'0 B';if(b<1024)return b+' B';
+  if(b<1048576)return(b/1024).toFixed(1)+' KB';
+  return(b/1048576).toFixed(2)+' MB';
+}
+function nowStr(){return new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit',second:'2-digit'});}
+function detectLang(url){
+  const ext=url.split('.').pop().toLowerCase();
+  const m={js:'JS',ts:'TS',py:'PY',java:'JAVA',html:'HTML',css:'CSS',json:'JSON',php:'PHP',go:'GO',rs:'RUST',cpp:'C++',c:'C',sh:'BASH',md:'MD',txt:'TXT',yaml:'YAML',yml:'YAML',xml:'XML',sql:'SQL'};
+  return m[ext]||ext.toUpperCase()||'TXT';
+}
+function escHtml(t){return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+function showToast(msg,type='info',dur=3000){
+  const icons={success:'<polyline points="20 6 9 17 4 12"/>',error:'<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>',info:'<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>'};
+  const t=document.createElement('div');
+  t.className=`toast ${type}`;
+  t.innerHTML=`<div class="toast-icon"><svg viewBox="0 0 24 24">${icons[type]||icons.info}</svg></div><div class="toast-msg">${msg}</div><div class="toast-time">${nowStr()}</div>`;
+  el.toastCont.appendChild(t);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>t.classList.add('show')));
+  setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),300);},dur);
+}
+
+function startProgress(){
+  el.progressWrap.style.display='block';el.progressBar.style.width='0%';
+  let p=0;
+  const tick=()=>{if(p<85){p+=Math.random()*12;if(p>85)p=85;el.progressBar.style.width=p+'%';setTimeout(tick,180+Math.random()*200);}};
+  tick();
+}
+function finishProgress(){
+  el.progressBar.style.width='100%';
+  setTimeout(()=>{el.progressWrap.style.display='none';el.progressBar.style.width='0%';},500);
+}
+function setStatus(t,type=''){el.sbStatusText.textContent=t;el.sbStatus.className='sb-item'+(type?' '+type:'');}
+function showPanel(w){
+  el.loadingState.style.display=w==='loading'?'flex':'none';
+  el.codeScrollArea.style.display=w==='code'?'block':'none';
+  el.emptyState.style.display=w==='empty'?'flex':'none';
+  el.errorState.style.display=w==='error'?'flex':'none';
+  el.gutter.style.display=w==='code'?'flex':'none';
+}
+function buildGutter(n){
+  const f=document.createDocumentFragment();
+  for(let i=1;i<=n;i++){const d=document.createElement('div');d.className='line-no';d.textContent=i;f.appendChild(d);}
+  el.gutter.innerHTML='';el.gutter.appendChild(f);
+}
+function highlight(code){
+  return escHtml(code)
+    .replace(/\/\/.+?(?=\n|$)/g,m=>`<span class="tok-cmt">${m}</span>`)
+    .replace(/\/\*[\s\S]*?\*\//g,m=>`<span class="tok-cmt">${m}</span>`)
+    .replace(/(["'`])((?:\\.|(?!\1)[^\\])*)\1/g,(m,q,i)=>`<span class="tok-str">${q}${i}${q}</span>`)
+    .replace(/\b(const|let|var|function|async|await|return|if|else|for|while|of|in|import|export|from|class|new|try|catch|throw|typeof|void|delete|this|true|false|null|undefined|=>)\b/g,m=>`<span class="tok-kw">${m}</span>`)
+    .replace(/\b([A-Z][A-Za-z0-9_]*)\b/g,m=>`<span class="tok-fn">${m}</span>`)
+    .replace(/\b(\d+\.?\d*)\b/g,m=>`<span class="tok-num">${m}</span>`);
+}
+function renderCode(text){
+  state.rawText=text;
+  const lines=text.split('\n');state.lineCount=lines.length;
+  const lang=detectLang(CONFIG.url);
+  const isJS=['JS','TS','JSX','TSX'].includes(lang);
+  el.codeEl.innerHTML=isJS?highlight(text):escHtml(text);
+  buildGutter(state.lineCount);
+  const bytes=new Blob([text]).size;
+  el.statLines.textContent=state.lineCount.toLocaleString();
+  el.statSize.textContent=formatBytes(bytes);
+  el.sbLines.textContent=state.lineCount+' lines';
+  el.sbSizeText.textContent=formatBytes(bytes);
+  el.langLabel.textContent=lang;
+  el.codeEl.style.whiteSpace=state.wordWrap?'pre-wrap':'pre';
+  showPanel('code');
+}
+
+async function fetchCode(){
+  if(state.fetching)return;
+  state.fetching=true;state.fetchStart=performance.now();
+  showPanel('loading');setStatus('Connecting...');startProgress();
+  el.statConn.textContent='...';el.statConn.style.color='var(--text-2)';
+  el.crumbFile.textContent=CONFIG.url.split('/').pop();
+  try{
+    const res=await fetch(CONFIG.url,{cache:'no-store'});
+    if(!res.ok)throw Object.assign(new Error('HTTP '+res.status),{code:'ERR_HTTP_'+res.status});
+    const text=await res.text();
+    const elapsed=Math.round(performance.now()-state.fetchStart);
+    if(!text||!text.trim()){showPanel('empty');setStatus('Empty file');el.statConn.textContent='EMPTY';el.statConn.style.color='var(--amber)';finishProgress();state.fetching=false;showToast('File is empty','info');return;}
+    renderCode(text);finishProgress();
+    const ts=nowStr();
+    el.statConn.textContent='OK';el.statConn.style.color='#4dff91';
+    el.statTime.textContent=ts;el.sbFetchTime.textContent=elapsed+'ms';el.ftTime.textContent=ts;
+    setStatus('Ready · '+elapsed+'ms','ok');state.retryCount=0;state.fetching=false;
+    showToast('Code synced successfully','success');
+  }catch(err){
+    const elapsed=Math.round(performance.now()-state.fetchStart);
+    finishProgress();state.fetching=false;
+    el.errorCode.textContent=err.code||'ERR_NETWORK';
+    el.errorDetail.innerHTML=`<strong>${CONFIG.url}</strong><br>`+(err.message||'Unknown error');
+    el.statConn.textContent='FAIL';el.statConn.style.color='var(--red)';
+    el.sbFetchTime.textContent=elapsed+'ms';
+    showPanel('error');setStatus('Failed to fetch','err');
+    showToast('Connection error: '+err.message,'error',5000);
+    if(state.retryCount<CONFIG.retryLimit){
+      state.retryCount++;
+      setTimeout(()=>{showToast(`Auto-retry ${state.retryCount}/${CONFIG.retryLimit}...`,'info');fetchCode();},CONFIG.retryDelay*state.retryCount);
+    }
+  }
+}
+
+let copyTimeout=null;
+async function copyCode(){
+  const text=state.rawText;
+  if(!text){showToast('Nothing to copy — load a file first','error');return;}
+  try{
+    await navigator.clipboard.writeText(text);onCopySuccess(text.length);
+  }catch(e){
+    try{
+      const ta=document.createElement('textarea');ta.value=text;
+      ta.setAttribute('readonly','');ta.style.cssText='position:fixed;top:-9999px;left:-9999px;opacity:0';
+      document.body.appendChild(ta);ta.focus();ta.select();
+      const ok=document.execCommand('copy');document.body.removeChild(ta);
+      if(ok)onCopySuccess(text.length);else throw new Error('execCommand failed');
+    }catch(e2){showToast('Copy failed — try Ctrl+A then Ctrl+C','error');}
+  }
+}
+function onCopySuccess(n){
+  clearTimeout(copyTimeout);
+  el.copyIcon.style.display='none';el.checkIcon.style.display='block';
+  el.copyLabel.textContent='Copied!';el.copyBtn.classList.add('copied');
+  el.copyFlash.classList.remove('fire');void el.copyFlash.offsetWidth;el.copyFlash.classList.add('fire');
+  showToast(`Copied ${n.toLocaleString()} characters`,'success');
+  copyTimeout=setTimeout(()=>{
+    el.copyIcon.style.display='block';el.checkIcon.style.display='none';
+    el.copyLabel.textContent='Copy Code';el.copyBtn.classList.remove('copied');
+  },2500);
+}
+
+function toggleWrap(){
+  state.wordWrap=!state.wordWrap;
+  if(el.codeEl)el.codeEl.style.whiteSpace=state.wordWrap?'pre-wrap':'pre';
+  el.wrapBtn.style.color=state.wordWrap?'var(--lime)':'';
+  el.wrapBtn.style.borderColor=state.wordWrap?'var(--lime-border)':'';
+}
+function toggleExpand(){
+  state.expanded=!state.expanded;
+  el.codeArea.style.maxHeight=state.expanded?'none':'520px';
+}
+function selectAll(){
+  if(!state.rawText)return;
+  const r=document.createRange();r.selectNodeContents(el.codeEl);
+  const s=window.getSelection();s.removeAllRanges();s.addRange(r);
+  showToast('All text selected','info',1500);
+}
+
+let searchDebounce=null;
+
+function initVault(){
+  // re-grab el references since DOM now visible
+  Object.assign(el,{
+    statConn:$('statConn'),statLines:$('statLines'),statSize:$('statSize'),statTime:$('statTime'),
+    loadingState:$('loadingState'),codeScrollArea:$('codeScrollArea'),
+    emptyState:$('emptyState'),errorState:$('errorState'),
+    codeEl:$('codeEl'),gutter:$('gutter'),codeArea:$('codeArea'),
+    copyBtn:$('copyBtn'),copyIcon:$('copyIcon'),checkIcon:$('checkIcon'),copyLabel:$('copyLabel'),
+    refreshBtn:$('refreshBtn'),expandBtn:$('expandBtn'),wrapBtn:$('wrapBtn'),selectAllBtn:$('selectAllBtn'),
+    emptyRetryBtn:$('emptyRetryBtn'),errRetryBtn:$('errRetryBtn'),errClearBtn:$('errClearBtn'),
+    sbStatusText:$('sbStatusText'),sbStatus:$('sbStatus'),sbLines:$('sbLines'),
+    sbSizeText:$('sbSizeText'),sbFetchTime:$('sbFetchTime'),
+    progressWrap:$('progressWrap'),progressBar:$('progressBar'),
+    crumbFile:$('crumbFile'),langLabel:$('langLabel'),
+    errorCode:$('errorCode'),errorDetail:$('errorDetail'),
+    searchInput:$('searchInput'),copyFlash:$('copyFlash'),
+    toastCont:$('toastContainer'),ftTime:$('ftTime'),
+  });
+
+  el.copyBtn.addEventListener('click',copyCode);
+  el.refreshBtn.addEventListener('click',()=>{state.retryCount=0;fetchCode();});
+  el.expandBtn.addEventListener('click',toggleExpand);
+  el.wrapBtn.addEventListener('click',toggleWrap);
+  el.selectAllBtn.addEventListener('click',selectAll);
+  el.emptyRetryBtn.addEventListener('click',()=>{state.retryCount=0;fetchCode();});
+  el.errRetryBtn.addEventListener('click',()=>{state.retryCount=0;fetchCode();});
+  el.errClearBtn.addEventListener('click',()=>{state.rawText='';showPanel('empty');setStatus('Cleared');});
+
+  el.searchInput.addEventListener('input',()=>{
+    clearTimeout(searchDebounce);
+    searchDebounce=setTimeout(()=>{
+      const q=el.searchInput.value.trim();
+      if(!q||!state.rawText){if(state.rawText)renderCode(state.rawText);return;}
+      const esc=q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+      const regex=new RegExp(`(${esc})`,'gi');
+      const lang=detectLang(CONFIG.url);
+      const isJS=['JS','TS','JSX','TSX'].includes(lang);
+      const base=isJS?highlight(state.rawText):escHtml(state.rawText);
+      el.codeEl.innerHTML=base.replace(new RegExp(`(${escHtml(q)})`,'gi'),'<mark style="background:rgba(198,241,53,0.25);color:var(--lime);border-radius:2px">$1</mark>');
+      const count=(state.rawText.match(regex)||[]).length;
+      if(count>0)showToast(`${count} match${count>1?'es':''} found`,'info',2000);
+    },250);
+  });
+
+  document.querySelectorAll('.tab').forEach(tab=>{
+    tab.addEventListener('click',()=>{
+      document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+      tab.classList.add('active');
+      const w=tab.dataset.tab;
+      if(w==='raw'&&state.rawText)el.codeEl.innerHTML=escHtml(state.rawText);
+      else if(w==='code'&&state.rawText)renderCode(state.rawText);
+      else if(w==='info'&&state.rawText){
+        const lines=state.rawText.split('\n');
+        const words=state.rawText.split(/\s+/).filter(Boolean).length;
+        const bytes=new Blob([state.rawText]).size;
+        el.codeEl.innerHTML=escHtml(`[File Information]\nURL       : ${CONFIG.url}\nLines     : ${lines.length}\nWords     : ${words}\nCharacters: ${state.rawText.length}\nBytes     : ${bytes} (${formatBytes(bytes)})\nEncoding  : UTF-8\nLanguage  : ${detectLang(CONFIG.url)}\n`);
+      }
+    });
+  });
+
+  document.addEventListener('keydown',e=>{
+    const ctrl=e.ctrlKey||e.metaKey;
+    if(ctrl&&e.key==='c'&&!window.getSelection().toString()){e.preventDefault();copyCode();}
+    if(ctrl&&e.key==='r'){e.preventDefault();fetchCode();}
+    if(ctrl&&e.key==='a'&&document.activeElement!==el.searchInput){if(state.rawText){e.preventDefault();selectAll();}}
+  });
+
+  setInterval(()=>{if(el.ftTime)el.ftTime.textContent=nowStr();},1000);
+  el.ftTime.textContent=nowStr();
+  fetchCode();
+}
+
+// ── Boot Verification ──
+window.addEventListener('load',()=>{ runStep1(); });
+</script>
 </body>
 </html>
